@@ -111,6 +111,37 @@ dialog textarea,dialog input[type=text]{width:100%;border:1px solid var(--line);
 dialog textarea{min-height:200px;resize:vertical;margin-top:8px}
 .err{color:var(--red);font-size:13px;margin-top:8px;min-height:18px}
 .dact{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+
+/* Floating Bottom Theme Button */
+.theme-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  z-index: 1000;
+  transition: transform 0.2s, background 0.2s;
+}
+.theme-fab:hover {
+  transform: translateY(-2px);
+  background: var(--navy2);
+}
+[data-theme="dark"] .theme-fab {
+  background: #fff;
+  color: var(--navy);
+}
+[data-theme="dark"] .theme-fab:hover {
+  background: #E2E5EA;
+}
+
 @media (prefers-reduced-motion:reduce){.skel{animation:none}}
 @media (max-width:960px){
 .app,.app.wideview{grid-template-columns:1fr}
@@ -121,6 +152,7 @@ dialog textarea{min-height:200px;resize:vertical;margin-top:8px}
 .ib{display:inline-flex}
 .hd{padding:12px 14px}.msgs,.body{padding:14px}.foot{padding:10px 14px}
 .hd .hide-m{display:none}
+.theme-fab { bottom: 16px; right: 16px; padding: 10px 16px; }
 }
 </style>
 </head>
@@ -250,9 +282,8 @@ function Sidebar(){
   <div class="clist">${list.map(c=>`<button class="conv ${c.id===S.sel&&S.view==='inbox'?'sel':''}" data-act="sel" data-id="${c.id}">${avatar(c.name)}<span class="tx"><b>${esc(c.name)}</b><small>${esc(c.sub)} · ${c.msgs.length} messages</small></span>${c.unread?`<span class="unr" aria-label="${c.unread} unread">${c.unread}</span>`:''}</button>`).join('')||'<p class="none" style="padding:10px;color:#93A3BA">No conversations match.</p>'}</div>
   <button class="sbtn" data-act="paste">${ic('plus',16)}Analyze your own chat</button>
   <div class="priv">${ic('lock',16)}<span>Chat text stays in this tab.</span></div>
-  <div style="margin: 0 14px 14px; display: flex; justify-content: space-between; align-items: center; color: #93A3BA; font-size: 12px;">
+  <div style="margin: 0 14px 14px; text-align: center; color: #93A3BA; font-size: 12px;">
     <span id="live-time" style="font-variant-numeric: tabular-nums;">Loading time...</span>
-    <button data-act="theme" class="ib" style="display:inline-flex; border:1px solid #3B5070; padding:4px; color:#C6D1E1; border-radius:6px" aria-label="Toggle Theme">${ic(S.theme==='dark'?'sun':'moon', 15)}</button>
   </div>
   </aside>`;
 }
@@ -294,7 +325,14 @@ function render(keepScroll=true){
   const ms=$('#msgs'),sc=ms?ms.scrollTop:0,qf=document.activeElement&&document.activeElement.id==='q',pane=app.dataset.pane;
   const c=cur();
   app.className='app'+(S.view!=='inbox'?' wideview':'');
-  app.innerHTML=Sidebar()+(S.view==='inbox'?Chat(c)+Insights(c):Wide());
+  
+  // Assemble layout, including floating button
+  app.innerHTML = Sidebar() + (S.view==='inbox'?Chat(c)+Insights(c):Wide()) + 
+    `<button data-act="theme" class="theme-fab" aria-label="Toggle Theme">
+      ${ic(S.theme==='dark'?'sun':'moon')}
+      <span>${S.theme==='dark'?'Light Mode':'Dark Mode'}</span>
+    </button>`;
+
   app.dataset.pane=pane;
   updateTime(); // update immediately on render
   const n=$('#msgs');if(n&&keepScroll)n.scrollTop=sc;
@@ -360,4 +398,4 @@ render();
 </script>
 </body>
 </html>
-```<FollowUp>
+```<FollowUp label="Want to know more about the logic used in this code?" query="How does the analysis regex in MissedIQ work?"/>
